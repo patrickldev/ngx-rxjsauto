@@ -1,27 +1,59 @@
-# NgxRxauto
+# Ngx-RxJsAuto (for Angular)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.2.3.
+To install: `npm install ngx-rxjsauto`
 
-## Development server
+Then, import `rxAuto` and make your services more readable by letting the library building queryParams for you when needed and more :
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Example in your service Typescript code:
 
-## Code scaffolding
+user.service.ts
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```typescript
+import { rxAuto } from "ngx-rxjsauto";
 
-## Build
+private readonly http = inject(HttpClient);
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+ getUser = () =>
+    rxAuto<User>('http://localhost:3000/user', this.http).getHttp();
 
-## Running unit tests
+  getUserById = (id: number) =>
+    rxAuto<User>(`http://localhost:3000/user?id=${id}`, this.http).getHttp();
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+  filterUser = (params: UserFilter) =>
+    rxAuto<User>('http://localhost:3000/user', this.http).getHttp(params);
 
-## Running end-to-end tests
+  addUser = (user: User) =>
+    rxAuto<User>('http://localhost:3000/user', this.http).postHttp(user);
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+Then, `subscribe` to your `Observable` like you've always done
 
-## Further help
+Component.ts:
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```typescript
+export class AppComponent implements OnInit {
+  userService = inject(UserService);
+
+  ngOnInit(): void {
+    //GET A LIST OF USER||
+    this.userService.getUser().subscribe((data) => console.log(data));
+
+    //GET WITH QUERY PARAMS||
+    let userFilter: UserFilter = { id: 1, name: "Patrick" };
+    this.userService.filterUser(userFilter).subscribe((data) => console.log(data));
+
+    //GET WITH ONE QUERY PARAMS
+    this.userService.getUserById(1).subscribe((data) => console.log(data));
+
+    //POST
+    const user: User = {
+      id: 4,
+      name: "Pollo",
+      role: "admin",
+    };
+    this.userService.addUser(this.user).subscribe((data) => console.log(data));
+  }
+}
+```
+
+And that's it! See how much more readable your services are now ?.

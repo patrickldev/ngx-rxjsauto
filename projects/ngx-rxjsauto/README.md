@@ -1,24 +1,59 @@
-# NgxRxjsauto
+# Ngx-RxJsAuto (for Angular)
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.0.
+To install: `npm install ngx-rxjsauto`
 
-## Code scaffolding
+Then, import `rxAuto` and make your services more readable by letting the library building queryParams for you when needed and more :
 
-Run `ng generate component component-name --project ngx-rxjsauto` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project ngx-rxjsauto`.
-> Note: Don't forget to add `--project ngx-rxjsauto` or else it will be added to the default project in your `angular.json` file. 
+Example in your service Typescript code:
 
-## Build
+user.service.ts
 
-Run `ng build ngx-rxjsauto` to build the project. The build artifacts will be stored in the `dist/` directory.
+```typescript
+import { rxAuto } from "ngx-rxjsauto";
 
-## Publishing
+private readonly http = inject(HttpClient);
 
-After building your library with `ng build ngx-rxjsauto`, go to the dist folder `cd dist/ngx-rxjsauto` and run `npm publish`.
+ getUser = () =>
+    rxAuto<User>('http://localhost:3000/user', this.http).getHttp();
 
-## Running unit tests
+  getUserById = (id: number) =>
+    rxAuto<User>(`http://localhost:3000/user?id=${id}`, this.http).getHttp();
 
-Run `ng test ngx-rxjsauto` to execute the unit tests via [Karma](https://karma-runner.github.io).
+  filterUser = (params: UserFilter) =>
+    rxAuto<User>('http://localhost:3000/user', this.http).getHttp(params);
 
-## Further help
+  addUser = (user: User) =>
+    rxAuto<User>('http://localhost:3000/user', this.http).postHttp(user);
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Then, `subscribe` to your `Observable` like you've always done
+
+Component.ts:
+
+```typescript
+export class AppComponent implements OnInit {
+  userService = inject(UserService);
+
+  ngOnInit(): void {
+    //GET A LIST OF USER||
+    this.userService.getUser().subscribe((data) => console.log(data));
+
+    //GET WITH QUERY PARAMS||
+    let userFilter: UserFilter = { id: 1, name: "Patrick" };
+    this.userService.filterUser(userFilter).subscribe((data) => console.log(data));
+
+    //GET WITH ONE QUERY PARAMS
+    this.userService.getUserById(1).subscribe((data) => console.log(data));
+
+    //POST
+    const user: User = {
+      id: 4,
+      name: "Pollo",
+      role: "admin",
+    };
+    this.userService.addUser(this.user).subscribe((data) => console.log(data));
+  }
+}
+```
+
+And that's it! See how much more readable your services are now ?.
