@@ -12,7 +12,6 @@ export function rxAuto<T>(baseUrl: string, http: HttpClient) {
       Object.keys(params).forEach((key) => {
         if (params[key] || params[key] == 0) {
           httpParams = httpParams.append(key, params[key]);
-          console.log('hello');
         }
       });
       return http.get<T>(url, { params: httpParams });
